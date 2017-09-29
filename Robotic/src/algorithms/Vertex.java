@@ -3,11 +3,16 @@ package algorithms;
 public class Vertex {
     private final String id;
     private final String name;
-
+    
     public Vertex(String id, String name) {
         this.id = id;
         this.name = name;
     }
+
+    public Vertex(String id) {
+        this(id, id);
+    }
+    
     public String getId() {
         return id;
     }

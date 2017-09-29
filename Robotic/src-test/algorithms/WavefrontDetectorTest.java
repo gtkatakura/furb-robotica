@@ -28,8 +28,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 1);
-		assertEquals(nextPoint.getY(), 0);
+		assertEquals(1, nextPoint.getX());
+		assertEquals(0, nextPoint.getY());
 	}
 	
 	@Test
@@ -45,8 +45,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 1);
-		assertEquals(nextPoint.getY(), 2);
+		assertEquals(1, nextPoint.getX());
+		assertEquals(2, nextPoint.getY());
 	}
 	
 	@Test
@@ -62,8 +62,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 0);
-		assertEquals(nextPoint.getY(), 1);
+		assertEquals(0, nextPoint.getX());
+		assertEquals(1, nextPoint.getY());
 	}
 	
 	@Test
@@ -79,8 +79,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 2);
-		assertEquals(nextPoint.getY(), 1);
+		assertEquals(2, nextPoint.getX());
+		assertEquals(1, nextPoint.getY());
 	}
 	
 	@Test
@@ -96,8 +96,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 0);
-		assertEquals(nextPoint.getY(), 0);
+		assertEquals(0, nextPoint.getX());
+		assertEquals(0, nextPoint.getY());
 	}
 	
 	@Test
@@ -113,8 +113,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 2);
-		assertEquals(nextPoint.getY(), 0);
+		assertEquals(2, nextPoint.getX());
+		assertEquals(0, nextPoint.getY());
 	}
 	
 	@Test
@@ -130,8 +130,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 0);
-		assertEquals(nextPoint.getY(), 2);
+		assertEquals(0, nextPoint.getX());
+		assertEquals(2, nextPoint.getY());
 	}
 	
 	@Test
@@ -147,8 +147,8 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 2);
-		assertEquals(nextPoint.getY(), 2);
+		assertEquals(2, nextPoint.getX());
+		assertEquals(2, nextPoint.getY());
 	}
 	
 	@Test
@@ -163,7 +163,7 @@ public class WavefrontDetectorTest {
 
 		Point nextPoint = detector.findFrom(source, value -> value == 0);
 		
-		assertEquals(nextPoint.getX(), 0);
-		assertEquals(nextPoint.getY(), 1);
+		assertEquals(0, nextPoint.getX());
+		assertEquals(1, nextPoint.getY());
 	}
 }

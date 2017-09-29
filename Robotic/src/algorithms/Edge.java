@@ -12,10 +12,15 @@ public class Edge  {
         this.destination = destination;
         this.weight = weight;
     }
+    
+    public Edge(Vertex source, Vertex destination, int weight) {
+        this("Edge_" + source.getId() + "_to_" + destination.getId(), source, destination, weight);
+    }
 
     public String getId() {
         return id;
     }
+    
     public Vertex getDestination() {
         return destination;
     }
@@ -23,12 +28,26 @@ public class Edge  {
     public Vertex getSource() {
         return source;
     }
+    
     public int getWeight() {
         return weight;
+    }
+    
+    public boolean equals(Object object) {
+    	if (object == null || !(object instanceof Edge)) {
+    		return false;
+    	}
+    	
+    	Edge other = (Edge) object;
+    	return (
+    		this.getSource().equals(other.getSource()) &&
+    		this.getDestination().equals(other.getDestination()) &&
+    		this.getWeight() == other.getWeight()
+    	);
     }
 
     @Override
     public String toString() {
-        return source + " " + destination;
+        return "<Edge @source=" + source + " @destination=" + destination + " @weight=" + weight + ">";
     }
 }

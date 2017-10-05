@@ -1,14 +1,15 @@
 package core;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import algorithms.DijkstraAlgorithm;
 import algorithms.Edge;
+import algorithms.Graph;
 import algorithms.Point;
 import algorithms.Vertex;
-import core.Mapeador.Direcao;
+import algorithms.WavefrontDetector;
 
 public class RoboticMapper {
 	private int[][] world;
@@ -16,17 +17,159 @@ public class RoboticMapper {
 	private Direction direction;
 	private ISensorWall sensorWall;
 	private List<Edge> edges;
-	private List<Vertex> vertexes;
-	private Point lastPosition;
-	private Vertex lastVertex;
+	private Vertex[][] vertexes;
+	private List<Vertex> vertexesAsList;
+	private WavefrontDetector detector;
 
 	public RoboticMapper(int[][] world, Point position, Direction direction, ISensorWall sensorWall) {
 		this.world = world;
 		this.position = position;
 		this.direction = direction;
 		this.sensorWall = sensorWall;
-		this.vertexes = new ArrayList<>();
+		this.vertexes = new Vertex[world.length][world.length];
+		this.vertexesAsList = new ArrayList<>();
 		this.edges = new ArrayList<>();
+		this.detector = new WavefrontDetector(world);
+		
+		for (int x = 0; x < world.length; x++) {
+			for (int y = 0; y < world.length; y++) {
+				Vertex vertex = new Vertex(this.generateIdFromPoint(new Point(x, y)));
+				vertexesAsList.add(vertex);
+				this.vertexes[y][x] = vertex;
+			}
+		}
+	}
+	
+	public void discover() {
+		this.map();
+		
+		if (!this.moviment()) {
+			if (this.hasWall(this.nextDirection())) {
+				Point next = this.nextPointNotMapped();
+				List<Vertex> path = this.getPath(next);
+				
+				for (Vertex nextVertex : path.subList(1, path.size())) {
+					Point nextPosition = fromVertex(nextVertex);
+					
+					while (true) {
+						if (nextPosition.getX() == position.getX()) {
+							if (nextPosition.getY() > position.getY()) {
+								if (direction == Direction.BACK) {
+									break;
+								}
+							} else {
+								if (direction == Direction.FRONT) {
+									break;
+								}
+							}
+						} else {
+							if (nextPosition.getX() > position.getX()) {
+								if (direction == Direction.RIGHT) {
+									break;
+								}
+								
+								if (direction == Direction.FRONT) {
+									this.rotate();
+									break;
+								}
+								
+								if (direction == Direction.BACK) {
+									this.rotateLeft();
+									break;
+								}
+							} else {
+								if (direction == Direction.LEFT) {
+									break;
+								}
+							}
+						}
+						
+						this.rotate();
+					}
+
+					this.movimentWithValidation();
+				}
+			} else {
+				this.rotate();
+				this.map();
+				
+				if (!this.moviment()) {
+					this.rotate();
+					this.map();
+					
+					if (!this.moviment()) {
+						this.rotate();
+						this.map();
+						this.moviment();
+					}
+				}
+			}
+		}
+	}
+	
+	private Point fromVertex(Vertex vertex) {
+		Integer vertexId = Integer.parseInt(vertex.getId());
+				
+		return new Point(
+			vertexId % 7 - 1,
+			vertexId / 7
+		);
+	}
+	
+	private Point nextPointNotMapped() {
+		return detector.findFrom(this.getPosition(), value -> value == 0);
+	}
+	
+	private List<Vertex> getPath(Point destination) {
+		List<Edge> edgesBidirectional = new ArrayList<>();
+		
+		for (Edge edge : this.getEdges()) {
+			edgesBidirectional.add(edge);
+			edgesBidirectional.add(new Edge(edge.getDestination(), edge.getSource(), 1));
+		}
+
+		Graph graph = new Graph(this.getVertexes(), edgesBidirectional);
+		DijkstraAlgorithm algorithm = new DijkstraAlgorithm(graph);
+		
+		return algorithm.getPath(
+			this.generateVertexFromPoint(this.position),
+			this.generateVertexFromPoint(destination)
+		);
+	}
+	
+	public void rotate() {
+		this.direction = this.nextDirection();
+	}
+	
+	private LinkedList<Direction> directions = new LinkedList<Direction>() {{
+		add(Direction.RIGHT);
+		add(Direction.BACK);
+		add(Direction.LEFT);
+		add(Direction.FRONT);
+	}};
+
+	public Direction nextDirection() {
+		int position = directions.indexOf(direction);
+		return directions.get((position + 1) % directions.size());
+	}
+	
+	public void rotateLeft() {
+		this.direction = this.nextDirectionLeft();
+	}
+
+	public Direction nextDirectionLeft() {
+		int position = directions.indexOf(direction);
+		int directionIndex = (position - 1) % directions.size();
+		
+		if (directionIndex == -1) {
+			directionIndex = directions.size() - 1;
+		}
+		
+		return directions.get(directionIndex);
+	}
+	
+	public List<Vertex> getVertexes() {
+		return this.vertexesAsList;
 	}
 	
 	public List<Edge> getEdges() {
@@ -37,49 +180,44 @@ public class RoboticMapper {
 		return sensorWall.detect(direction);
 	}
 	
-	public boolean isVertex() {
+//	public boolean isVertex() {
 //		return !this.hasWall(Direction.FRONT) && !this.hasWall(Direction.RIGHT);
-		return !this.hasWall(Direction.RIGHT) && !this.hasWall(Direction.BACK);
+//		return !this.hasWall(direction) && !this.hasWall(nextDirection());
+//	}
+	
+	private void addEdge(Point source, Point destination) {
+		Vertex vertexSource = this.vertexes[source.getY()][source.getX()];
+		Vertex vertexDestination = this.vertexes[destination.getY()][destination.getX()];
+
+		Edge edge = new Edge(
+			vertexSource,
+			vertexDestination,
+			1
+		);
+		
+		if (!edges.contains(edge)) {
+			edges.add(edge);
+		}
 	}
 	
 	public void map() {
-		if (!isVertex()) {
-			return;
+		if (!this.hasWall(this.direction) && !this.isPointInvalid(this.getNextPosition())) {
+			this.addEdge(this.position, this.getNextPosition());
 		}
 		
-		Vertex vertexFromCurrentPosition = new Vertex(this.generateIdFromPoint(this.position));
-		Point rightPosition = this.getNextPosition(Direction.BACK);
-		Vertex vertexFromRightPosition = new Vertex(this.generateIdFromPoint(rightPosition));
-		
-		Edge edge = new Edge(
-			vertexFromCurrentPosition,
-			vertexFromRightPosition,
-			calculateDistance(this.position, rightPosition, Direction.BACK)
-		);
-		
-		vertexes.add(vertexFromCurrentPosition);
-		vertexes.add(vertexFromRightPosition);
-		
-		if (this.lastVertex != null) {
-			edges.add(new Edge(
-				lastVertex,
-				vertexFromCurrentPosition,
-				calculateDistance(this.lastPosition, this.position, direction)
-			));
+		if (!this.hasWall(this.nextDirection()) && !this.isPointInvalid(this.getNextPosition(this.nextDirection()))) {
+			this.addEdge(this.position, this.getNextPosition(this.nextDirection()));
 		}
 		
-		this.lastVertex = vertexFromCurrentPosition;
-		this.lastPosition = this.position;
+		if (!this.hasWall(this.nextDirectionLeft()) && !this.isPointInvalid(this.getNextPosition(this.nextDirectionLeft()))) {
+			this.addEdge(this.position, this.getNextPosition(this.nextDirectionLeft()));
+		}
 		
-		edges.add(edge);
+		this.world[this.position.getY()][this.position.getX()] = 1;
 	}
 	
-	private int calculateDistance(Point source, Point destination, Direction direction) {
-		if (direction == Direction.LEFT || direction == Direction.RIGHT) {
-			return Math.abs(source.getX() - destination.getX());
-		}
-		
-		return Math.abs(source.getY() - destination.getY());
+	public Vertex generateVertexFromPoint(Point point) {
+		return new Vertex(this.generateIdFromPoint(point));
 	}
 	
 	private String generateIdFromPoint(Point point) {
@@ -88,7 +226,16 @@ public class RoboticMapper {
 		);
 	}
 	
-	public void moviment() {
+	public boolean moviment() {
+		if (this.hasNextPositionInvalid()) {
+			return false;
+		}
+		
+		this.position = this.getNextPosition();
+		return true;
+	}
+	
+	public void movimentWithValidation() {
 		this.position = this.getNextPosition();
 	}
 	
@@ -102,6 +249,24 @@ public class RoboticMapper {
 	
 	public Point getNextPosition(Direction direction) {
 		return new Point(nextX(direction), nextY(direction));
+	}
+	
+	private boolean hasNextPositionInvalid() {
+		Point nextPosition = this.getNextPosition();
+		
+		return (
+			isPointInvalid(nextPosition) ||
+			world[nextPosition.getY()][nextPosition.getX()] == 1
+		);
+	}
+	
+	private boolean isPointInvalid(Point point) {
+		return (
+			point.getX() == -1 ||
+			point.getX() == world.length ||
+			point.getY() == -1 ||
+			point.getY() == world.length
+		);
 	}
 	
 	private int nextX(Direction direction) {

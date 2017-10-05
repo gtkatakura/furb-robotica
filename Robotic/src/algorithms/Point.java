@@ -29,4 +29,8 @@ public class Point {
 			this.getY() == other.getY()
 		);
 	}
+	
+	public String toString() {
+		return "X = " + this.getX() + ", Y = " + this.getY();
+	}
 }

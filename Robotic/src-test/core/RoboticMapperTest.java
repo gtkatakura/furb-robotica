@@ -2,14 +2,13 @@ package core;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
-import algorithms.Edge;
-import algorithms.Point;
-import algorithms.Vertex;
+import algorithms.*;
 
 public class RoboticMapperTest {
 	static int[][] world = new int[][] {
@@ -25,40 +24,47 @@ public class RoboticMapperTest {
 	static List<Vertex> vertexes = new ArrayList<>();
 	
 	static List<Edge> walls = new ArrayList<Edge>() {{
-		add(createEdge(4, 11, 1));
-		add(createEdge(5, 12, 1));
+		add(createEdge(4, 11));
+		add(createEdge(5, 12));
+
+		add(createEdge(13, 14));
+		add(createEdge(20, 21));
+		add(createEdge(27, 28));
+		add(createEdge(34, 35));
+
+		add(createEdge(37, 44));
+		add(createEdge(38, 45));
+		add(createEdge(39, 46));
+		add(createEdge(40, 47));
+		add(createEdge(41, 48));
+
+		add(createEdge(8, 9));
+		add(createEdge(15, 16));
+		add(createEdge(22, 23));
+		add(createEdge(29, 30));
 		
-//		add(createEdge(8, 9, 1));
-//		add(createEdge(15, 16, 1));
-//		add(createEdge(22, 23, 1));
-//		add(createEdge(29, 30, 1));
-//		add(createEdge(22, 23, 1));
+		add(createEdge(10, 11));
+		add(createEdge(17, 18));
+		add(createEdge(24, 25));
+		add(createEdge(31, 32));
+		
+		add(createEdge(32, 39));
+		add(createEdge(33, 40));
 	}};
 	
-//	static List<Edge> edges = new ArrayList<Edge>() {{
-//		add(createEdge(1, 8, 1));
-//		add(createEdge(1, 2, 1));
-//		add(createEdge(2, 9, 1));
-//		add(createEdge(2, 3, 1));
-//		add(createEdge(3, 10, 1));
-//		add(createEdge(3, 6, 3));
-//		add(createEdge(6, 13, 3));
-//		add(createEdge(6, 7, 1));
-//		add(createEdge(7, 42, 5));
-//		add(createEdge(42, 41, 1));
-//		add(createEdge(42, 49, 1));
-//		add(createEdge(49, 43, 6));
-//		add(createEdge(43, 36, 1));
-//		add(createEdge(36, 37, 1));
-//	}};
-	
-	static Edge createEdge(int sourceId, int destinationId, int weight) {
-		return new Edge(createVertex(sourceId), createVertex(destinationId), weight);
+	static Edge createEdge(int sourceId, int destinationId) {
+		return new Edge(createVertex(sourceId), createVertex(destinationId), 1);
 	}
 	
-	static Edge findEdge(String id) {
+	static Edge findEdge(Edge edge2) {
+		Edge invertEdge = new Edge(
+			edge2.getDestination(),
+			edge2.getSource(),
+			edge2.getWeight()
+		);
+		
 		return walls.stream()
-			.filter(edge -> edge.getId().equals(id))
+			.filter(edge -> edge.equals(edge2) || edge.equals(invertEdge))
 			.findFirst()
 			.orElse(null);
 	}
@@ -89,12 +95,13 @@ public class RoboticMapperTest {
 		}
 		
 		public boolean detect(Direction direction) {
-			Edge edge = findEdge(
-				"Edge_" + generateIdFromPoint(robotic.getPosition()) +
-				"_to_" + generateIdFromPoint(robotic.getNextPosition(direction))
+			Edge edge = new Edge(
+				createVertex(generateIdFromPoint(robotic.getPosition())),
+				createVertex(generateIdFromPoint(robotic.getNextPosition(direction))),
+				1
 			);
 			
-			return edge != null;
+			return findEdge(edge) != null;
 		}
 		
 		private int generateIdFromPoint(Point point) {
@@ -103,9 +110,15 @@ public class RoboticMapperTest {
 	}
 
 	@Test
-	public void test() {
+	public void test2() {
 		SensorWallMock sensorWall = new SensorWallMock();
 		List<Edge> edges = new ArrayList<>();
+		
+		for (int i = 0; i < world.length; i++) {
+			for (int j = 0; j < world.length; j++) {
+				world[i][j] = 0;
+			}
+		}
 
 		RoboticMapper robotic = new RoboticMapper(
 			world,
@@ -116,85 +129,93 @@ public class RoboticMapperTest {
 		
 		sensorWall.setRobotic(robotic);
 		
-		// Action 1
-		assertFalse(robotic.hasWall(Direction.FRONT));
-		assertFalse(robotic.hasWall(Direction.RIGHT));
-		assertTrue(robotic.isVertex());
+		Edge[][] edgesExpecteds = new Edge[][] {
+			{ createEdge(1, 2), createEdge(1, 8) },
+			{ createEdge(2, 3), createEdge(2, 9) },
+			{ createEdge(3, 4), createEdge(3, 10) },
+			{ createEdge(4, 5) },
+			{ createEdge(5, 6) },
+			{ createEdge(6, 7), createEdge(6, 13) },
+			{ createEdge(7, 14) },
+			{ createEdge(14, 21) },
+			{ createEdge(21, 28) },
+			{ createEdge(28, 35) },
+			{ createEdge(35, 42) },
+			{ createEdge(42, 49), createEdge(42, 41) },
+			{ createEdge(49, 48) },
+			{ createEdge(48, 47) },
+			{ createEdge(47, 46) },
+			{ createEdge(46, 45) },
+			{ createEdge(45, 44) },
+			{ createEdge(44, 43) },
+			{ createEdge(43, 36) },
+			{ createEdge(36, 29), createEdge(36, 37) },
+			{ createEdge(29, 22) },
+			{ createEdge(22, 15) },
+			{ createEdge(15, 8) },
+			{ },
+			{ createEdge(9, 16), createEdge(9, 10) },
+			{ createEdge(16, 23), createEdge(16, 17) },
+			{ createEdge(23, 30), createEdge(23, 24) },
+			{ createEdge(30, 37), createEdge(30, 31) },
+			{ createEdge(37, 38) },
+			{ createEdge(38, 39), createEdge(38, 31) },
+			{ createEdge(39, 40) },
+			{ createEdge(40, 41) },
+		};
 		
-		robotic.map();
-		
-		edges.add(new Edge(createVertex(1), createVertex(8), 1));
-		assertEquals(edges, robotic.getEdges());
-		
-		robotic.moviment();
-		assertEquals(robotic.getPosition(), new Point(1, 0));
-		
-		
-		// Action 2
-		assertFalse(robotic.hasWall(Direction.FRONT));
-		assertFalse(robotic.hasWall(Direction.RIGHT));
-		assertTrue(robotic.isVertex());
-		
-		robotic.map();
-		edges.add(new Edge(createVertex(1), createVertex(2), 1));
-		edges.add(new Edge(createVertex(2), createVertex(9), 1));
-		assertEquals(edges, robotic.getEdges());
-		
-		robotic.moviment();
-		assertEquals(robotic.getPosition(), new Point(2, 0));
-		
-		
-		// Action 3
-		assertFalse(robotic.hasWall(Direction.FRONT));
-		assertFalse(robotic.hasWall(Direction.RIGHT));
-		assertTrue(robotic.isVertex());
-		
-		robotic.map();
-		edges.add(new Edge(createVertex(2), createVertex(3), 1));
-		edges.add(new Edge(createVertex(3), createVertex(10), 1));
-		assertEquals(edges, robotic.getEdges());
-		
-		robotic.moviment();
-		assertEquals(robotic.getPosition(), new Point(3, 0));
+		Point[] pointsExpecteds = new Point[] {
+			new Point(1, 0),
+			new Point(2, 0),
+			new Point(3, 0),
+			new Point(4, 0),
+			new Point(5, 0),
+			new Point(6, 0),
+			new Point(6, 1),
+			new Point(6, 2),
+			new Point(6, 3),
+			new Point(6, 4),
+			new Point(6, 5),
+			new Point(6, 6),
+			new Point(5, 6),
+			new Point(4, 6),
+			new Point(3, 6),
+			new Point(2, 6),
+			new Point(1, 6),
+			new Point(0, 6),
+			new Point(0, 5),
+			new Point(0, 4),
+			new Point(0, 3),
+			new Point(0, 2),
+			new Point(0, 1),
+			new Point(1, 1),
+			new Point(1, 2),
+			new Point(1, 3),
+			new Point(1, 4),
+			new Point(1, 5),
+			new Point(2, 5),
+			new Point(3, 5),
+			new Point(4, 5),
+			new Point(5, 5),
+		};
 
-		// Action 4
-		assertFalse(robotic.isVertex());
-		
-		robotic.map();
-		assertEquals(edges, robotic.getEdges());
-		
-		robotic.moviment();
-		assertEquals(robotic.getPosition(), new Point(4, 0));
+		for (int i = 0; i < edgesExpecteds.length; i++) {
+			Edge[] edgesExpected = edgesExpecteds[i];
 
-		// Action 5
-		assertFalse(robotic.isVertex());
-		
-		robotic.map();
-		assertEquals(edges, robotic.getEdges());
-		
-		robotic.moviment();
-		assertEquals(robotic.getPosition(), new Point(5, 0));
-
-		// Action 6
-		assertTrue(robotic.isVertex());
-		
-		robotic.map();
-		edges.add(new Edge(createVertex(3), createVertex(6), 3));
-		edges.add(new Edge(createVertex(6), createVertex(13), 1));
-		assertEquals(edges, robotic.getEdges());
-		
-		robotic.moviment();
-		assertEquals(robotic.getPosition(), new Point(6, 0));
-		
-
-//		add(createEdge(3, 6, 3));
-//		add(createEdge(6, 13, 3));
-//		add(createEdge(6, 7, 1));
-//		add(createEdge(7, 42, 5));
-//		add(createEdge(42, 41, 1));
-//		add(createEdge(42, 49, 1));
-//		add(createEdge(49, 43, 6));
-//		add(createEdge(43, 36, 1));
-//		add(createEdge(36, 37, 1));
+			robotic.discover();
+			
+			for (Edge edgeExpected : edgesExpected) {
+				edges.add(edgeExpected);
+			}
+			
+			assertEquals(edges, robotic.getEdges());
+			assertEquals(pointsExpecteds[i], robotic.getPosition());
+		}
+	}
+	
+	public static <T> List<T> copyList(List<T> source) {
+	    List<T> dest = new ArrayList<T>();
+	    for (T item : source) { dest.add(item); }
+	    return dest;
 	}
 }

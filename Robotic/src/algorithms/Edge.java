@@ -40,9 +40,8 @@ public class Edge  {
     	
     	Edge other = (Edge) object;
     	return (
-    		this.getSource().equals(other.getSource()) &&
-    		this.getDestination().equals(other.getDestination()) &&
-    		this.getWeight() == other.getWeight()
+    		(this.getSource().equals(other.getSource()) && this.getDestination().equals(other.getDestination()))
+    		|| (this.getSource().equals(other.getDestination()) && this.getDestination().equals(other.getSource()))
     	);
     }
 

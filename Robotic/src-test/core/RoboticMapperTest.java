@@ -193,6 +193,12 @@ public class RoboticMapperTest {
 			{ createEdge(18, 25), createEdge(18, 19) },
 			{ createEdge(25, 32), createEdge(25, 26) },
 			{ createEdge(32, 33) },
+			{ createEdge(33, 26) },
+			{ createEdge(26, 19) },
+			{ },
+			{ createEdge(10, 17) },
+			{ createEdge(17, 24) },
+			{ createEdge(24, 31) },
 		};
 		
 		Point[] pointsExpecteds = new Point[] {
@@ -238,6 +244,12 @@ public class RoboticMapperTest {
 			new Point(3, 3),
 			new Point(3, 4),
 			new Point(4, 4),
+			new Point(4, 3),
+			new Point(4, 2),
+			new Point(2, 1),
+			new Point(2, 2),
+			new Point(2, 3),
+			new Point(2, 4),
 		};
 
 		for (int i = 0; i < edgesExpecteds.length; i++) {

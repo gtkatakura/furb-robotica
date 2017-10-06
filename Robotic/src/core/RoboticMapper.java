@@ -50,7 +50,15 @@ public class RoboticMapper {
 		this.map();
 		
 		if (!this.moviment()) {
-			if (this.hasWall(Direction.RIGHT)) {
+			if (!this.hasNextPositionInvalid(this.getNextPosition(this.nextDirection())) && !this.hasWall(Direction.RIGHT)) {
+				this.rotate();
+				this.map();
+				this.moviment();
+			} else if (!this.hasNextPositionInvalid(this.getNextPosition(this.nextDirectionLeft())) && !this.hasWall(Direction.LEFT)) {
+				this.rotateLeft();
+				this.map();
+				this.moviment();
+			} else {
 				Point next = this.nextPointNotMapped();
 				List<Vertex> path = this.getPath(next);
 				
@@ -104,20 +112,6 @@ public class RoboticMapper {
 					}
 
 					this.movimentWithValidation();
-				}
-			} else {
-				this.rotate();
-				this.map();
-				
-				if (!this.moviment()) {
-					this.rotate();
-					this.map();
-					
-					if (!this.moviment()) {
-						this.rotate();
-						this.map();
-						this.moviment();
-					}
 				}
 			}
 		}
@@ -271,7 +265,10 @@ public class RoboticMapper {
 	
 	private boolean hasNextPositionInvalid() {
 		Point nextPosition = this.getNextPosition();
-		
+		return this.hasNextPositionInvalid(nextPosition);
+	}
+	
+	private boolean hasNextPositionInvalid(Point nextPosition) {
 		return (
 			isPointInvalid(nextPosition) ||
 			world[nextPosition.getY()][nextPosition.getX()] == 1

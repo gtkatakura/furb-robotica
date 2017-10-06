@@ -95,9 +95,17 @@ public class RoboticMapperTest {
 		}
 		
 		public boolean detect(Direction direction) {
+			Direction nextDirection = this.robotic.getDirection();
+			
+			if (direction == Direction.RIGHT) {
+				nextDirection = robotic.nextDirection();
+			} else if (direction == Direction.LEFT) {
+				nextDirection = robotic.nextDirectionLeft();
+			}
+			
 			Edge edge = new Edge(
 				createVertex(generateIdFromPoint(robotic.getPosition())),
-				createVertex(generateIdFromPoint(robotic.getNextPosition(direction))),
+				createVertex(generateIdFromPoint(robotic.getNextPosition(nextDirection))),
 				1
 			);
 			
@@ -108,6 +116,21 @@ public class RoboticMapperTest {
 			return (point.getX() + 1) + (point.getY() * 7);
 		}
 	}
+	
+	public class RoboticMock implements IRobotic {
+		public RoboticMock(SensorWallMock sensorWall) {
+		}
+		
+		@Override
+		public void moviment() {
+		}
+
+		@Override
+		public void rotate(Direction direction) {
+		}
+
+	}
+
 
 	@Test
 	public void test2() {
@@ -124,7 +147,8 @@ public class RoboticMapperTest {
 			world,
 			new Point(0, 0),
 			Direction.RIGHT,
-			sensorWall
+			sensorWall,
+			new RoboticMock(sensorWall)
 		);
 		
 		sensorWall.setRobotic(robotic);

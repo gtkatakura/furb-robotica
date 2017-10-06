@@ -20,12 +20,14 @@ public class RoboticMapper {
 	private Vertex[][] vertexes;
 	private List<Vertex> vertexesAsList;
 	private WavefrontDetector detector;
+	private IRobotic robotic;
 
-	public RoboticMapper(int[][] world, Point position, Direction direction, ISensorWall sensorWall) {
+	public RoboticMapper(int[][] world, Point position, Direction direction, ISensorWall sensorWall, IRobotic robotic) {
 		this.world = world;
 		this.position = position;
 		this.direction = direction;
 		this.sensorWall = sensorWall;
+		this.robotic = robotic;
 		this.vertexes = new Vertex[world.length][world.length];
 		this.vertexesAsList = new ArrayList<>();
 		this.edges = new ArrayList<>();
@@ -38,6 +40,10 @@ public class RoboticMapper {
 				this.vertexes[y][x] = vertex;
 			}
 		}
+	}
+	
+	public Direction getDirection() {
+		return this.direction;
 	}
 	
 	public void discover() {
@@ -57,8 +63,18 @@ public class RoboticMapper {
 								if (direction == Direction.BACK) {
 									break;
 								}
+								
+								if (direction == Direction.LEFT) {
+									this.rotateLeft();
+									break;
+								}
 							} else {
 								if (direction == Direction.FRONT) {
+									break;
+								}
+								
+								if (direction == Direction.RIGHT) {
+									this.rotateLeft();
 									break;
 								}
 							}
@@ -68,17 +84,17 @@ public class RoboticMapper {
 									break;
 								}
 								
-								if (direction == Direction.FRONT) {
-									this.rotate();
-									break;
-								}
-								
 								if (direction == Direction.BACK) {
 									this.rotateLeft();
 									break;
 								}
 							} else {
 								if (direction == Direction.LEFT) {
+									break;
+								}
+								
+								if (direction == Direction.FRONT) {
+									this.rotateLeft();
 									break;
 								}
 							}
@@ -138,6 +154,7 @@ public class RoboticMapper {
 	}
 	
 	public void rotate() {
+		this.robotic.rotate(Direction.RIGHT);
 		this.direction = this.nextDirection();
 	}
 	
@@ -154,6 +171,7 @@ public class RoboticMapper {
 	}
 	
 	public void rotateLeft() {
+		this.robotic.rotate(Direction.LEFT);
 		this.direction = this.nextDirectionLeft();
 	}
 
@@ -201,15 +219,15 @@ public class RoboticMapper {
 	}
 	
 	public void map() {
-		if (!this.hasWall(this.direction) && !this.isPointInvalid(this.getNextPosition())) {
+		if (!this.hasWall(Direction.FRONT) && !this.isPointInvalid(this.getNextPosition())) {
 			this.addEdge(this.position, this.getNextPosition());
 		}
 		
-		if (!this.hasWall(this.nextDirection()) && !this.isPointInvalid(this.getNextPosition(this.nextDirection()))) {
+		if (!this.hasWall(Direction.RIGHT) && !this.isPointInvalid(this.getNextPosition(this.nextDirection()))) {
 			this.addEdge(this.position, this.getNextPosition(this.nextDirection()));
 		}
 		
-		if (!this.hasWall(this.nextDirectionLeft()) && !this.isPointInvalid(this.getNextPosition(this.nextDirectionLeft()))) {
+		if (!this.hasWall(Direction.LEFT) && !this.isPointInvalid(this.getNextPosition(this.nextDirectionLeft()))) {
 			this.addEdge(this.position, this.getNextPosition(this.nextDirectionLeft()));
 		}
 		
@@ -231,11 +249,12 @@ public class RoboticMapper {
 			return false;
 		}
 		
-		this.position = this.getNextPosition();
+		this.movimentWithValidation();
 		return true;
 	}
 	
 	public void movimentWithValidation() {
+		this.robotic.moviment();
 		this.position = this.getNextPosition();
 	}
 	

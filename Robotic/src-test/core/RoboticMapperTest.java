@@ -118,9 +118,6 @@ public class RoboticMapperTest {
 	}
 	
 	public class RoboticMock implements IRobotic {
-		public RoboticMock(SensorWallMock sensorWall) {
-		}
-		
 		@Override
 		public void moviment() {
 		}
@@ -148,7 +145,7 @@ public class RoboticMapperTest {
 			new Point(0, 0),
 			Direction.RIGHT,
 			sensorWall,
-			new RoboticMock(sensorWall)
+			new RoboticMock()
 		);
 		
 		sensorWall.setRobotic(robotic);
@@ -186,6 +183,16 @@ public class RoboticMapperTest {
 			{ createEdge(38, 39), createEdge(38, 31) },
 			{ createEdge(39, 40) },
 			{ createEdge(40, 41) },
+			{ createEdge(41, 34) },
+			{ createEdge(34, 27), createEdge(34, 33) },
+			{ createEdge(27, 20), createEdge(27, 26) },
+			{ createEdge(20, 13), createEdge(20, 19) },
+			{ createEdge(13, 12) },
+			{ createEdge(12, 11), createEdge(12, 19) },
+			{ createEdge(11, 18) },
+			{ createEdge(18, 25), createEdge(18, 19) },
+			{ createEdge(25, 32), createEdge(25, 26) },
+			{ createEdge(32, 33) },
 		};
 		
 		Point[] pointsExpecteds = new Point[] {
@@ -221,6 +228,16 @@ public class RoboticMapperTest {
 			new Point(3, 5),
 			new Point(4, 5),
 			new Point(5, 5),
+			new Point(5, 4),
+			new Point(5, 3),
+			new Point(5, 2),
+			new Point(5, 1),
+			new Point(4, 1),
+			new Point(3, 1),
+			new Point(3, 2),
+			new Point(3, 3),
+			new Point(3, 4),
+			new Point(4, 4),
 		};
 
 		for (int i = 0; i < edgesExpecteds.length; i++) {

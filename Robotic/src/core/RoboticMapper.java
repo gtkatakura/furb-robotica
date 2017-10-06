@@ -50,7 +50,7 @@ public class RoboticMapper {
 		this.map();
 		
 		if (!this.moviment()) {
-			if (this.hasWall(this.nextDirection())) {
+			if (this.hasWall(Direction.RIGHT)) {
 				Point next = this.nextPointNotMapped();
 				List<Vertex> path = this.getPath(next);
 				
@@ -198,11 +198,6 @@ public class RoboticMapper {
 		return sensorWall.detect(direction);
 	}
 	
-//	public boolean isVertex() {
-//		return !this.hasWall(Direction.FRONT) && !this.hasWall(Direction.RIGHT);
-//		return !this.hasWall(direction) && !this.hasWall(nextDirection());
-//	}
-	
 	private void addEdge(Point source, Point destination) {
 		Vertex vertexSource = this.vertexes[source.getY()][source.getX()];
 		Vertex vertexDestination = this.vertexes[destination.getY()][destination.getX()];
@@ -245,6 +240,10 @@ public class RoboticMapper {
 	}
 	
 	public boolean moviment() {
+		if (this.hasWall(Direction.FRONT)) {
+			return false;
+		}
+		
 		if (this.hasNextPositionInvalid()) {
 			return false;
 		}
